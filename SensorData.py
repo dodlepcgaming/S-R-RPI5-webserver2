@@ -1,23 +1,36 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.staticfiles import StaticFiles
-import serial_asyncio
 import asyncio
+import websockets
+import serial
 import json
 
-app = FastAPI()
+# Setup Serial - Update to /dev/ttyUSB0 if using USB
+ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=0.1)
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    
-    try:
-        reader, _ = await serial_asyncio.open_serial_connection(url='/dev/ttyAMA0', baudrate=115200)
-        
-        while True:
-            line = await reader.readline()
-            data = line.decode().strip()
-            await websocket.send_json({"sensor": data})
-    except Exception as e:
-        print(f"Connection closed: {e}")
-    finally:
-        await websocket.close()
+async def handle_websocket(websocket):
+    print("Web client connected to overlay")
+    while True:
+        try:
+            # 1. Ask ESP32 for data
+            ser.write(b"LSRSD\n")
+            
+            # 2. Wait for 2-byte response
+            if ser.in_waiting >= 2:
+                raw = ser.read(2)
+                distance = (raw[0] << 8) | raw[1]
+                
+                # 3. Create JSON packet for your JS
+                payload = json.dumps({"sensor": f"{distance} mm"})
+                await websocket.send(payload)
+            
+            await asyncio.sleep(0.1) # 10Hz Refresh rate
+        except websockets.exceptions.ConnectionClosed:
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+
+start_server = websockets.serve(handle_websocket, "0.0.0.0", 8000)
+
+print("WebSocket Server started on port 8000")
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
