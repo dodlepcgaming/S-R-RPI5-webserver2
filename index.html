@@ -25,8 +25,11 @@
     </div>
 
 <script>
+
+    let ws;
+
     function connect() {
-        const ws = new WebSocket("ws://192.168.50.6:8001");
+        ws = new WebSocket("ws://192.168.50.6:8001");
 
         ws.onopen = () => {
             document.getElementById('status').innerText = "LIVE";
@@ -53,5 +56,6 @@
 
     connect(); // Start connection
 </script>
+<script src="UserInputs.js"></script>
 </body>
 </html>
