@@ -29,11 +29,15 @@ async def handle_websocket(websocket):
                 last_heartbeat = time.time()
 
             # 3. Request and Read Sensor Data
-            ser.write(b'L') # 'L' triggers the distance read
             if ser.in_waiting >= 2:
                 raw = ser.read(2)
+                # Reassemble as an unsigned 16-bit integer
                 distance = (raw[0] << 8) | raw[1]
-                # Send back to the web overlay
+                
+                # Filter out garbage values (anything over 3 meters is likely an error)
+                if distance > 3000:
+                    distance = 0
+                    
                 await websocket.send(json.dumps({"sensor": f"{distance} mm"}))
 
             await asyncio.sleep(0.05) # 20Hz refresh rate
