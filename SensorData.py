@@ -2,35 +2,40 @@ import asyncio
 import websockets
 import serial
 import json
+import time
 
-# Setup Serial - Update to /dev/ttyUSB0 if using USB
+# Pi 5 GPIO Serial Port
 ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=0.1)
 
 async def handle_websocket(websocket):
-    print("Web client connected to overlay")
+    print("Web client connected")
+    last_heartbeat = 0
+    
     while True:
         try:
-            # 1. Ask ESP32 for data
-            ser.write(b"LSRSD\n")
-            
-            # 2. Wait for 2-byte response
+            # 1. Listen for User Input (WASD/Gamepad) from the browser
+            try:
+                # Use wait_for to prevent blocking the heartbeat/sensor loop
+                message = await asyncio.wait_for(websocket.recv(), timeout=0.01)
+                data = json.loads(message)
+                if "command" in data:
+                    ser.write(data["command"].encode()) # Sends '1', '2', etc.
+            except asyncio.TimeoutError:
+                pass
+
+            # 2. Send Heartbeat 'C' every 2 seconds
+            if time.time() - last_heartbeat > 2:
+                ser.write(b'C')
+                last_heartbeat = time.time()
+
+            # 3. Request and Read Sensor Data
+            ser.write(b'L') # 'L' triggers the distance read
             if ser.in_waiting >= 2:
                 raw = ser.read(2)
                 distance = (raw[0] << 8) | raw[1]
-                
-                # 3. Create JSON packet for your JS
-                payload = json.dumps({"sensor": f"{distance} mm"})
-                await websocket.send(payload)
-            
-            await asyncio.sleep(0.1) # 10Hz Refresh rate
+                # Send back to the web overlay
+                await websocket.send(json.dumps({"sensor": f"{distance} mm"}))
+
+            await asyncio.sleep(0.05) # 20Hz refresh rate
         except websockets.exceptions.ConnectionClosed:
             break
-        except Exception as e:
-            print(f"Error: {e}")
-            break
-
-start_server = websockets.serve(handle_websocket, "0.0.0.0", 8001)
-
-print("WebSocket Server started on port 8001")
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
