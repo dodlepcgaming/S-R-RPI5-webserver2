@@ -39,7 +39,7 @@
             
             // Visual alert if too close
             let distInt = parseInt(data.sensor);
-            document.getElementById('val').style.color = (distInt < 150) ? "red" : "#00ff00";
+            document.getElementById('val').style.color = (distInt < 100) ? "red" : "#00ff00";
         };
 
         ws.onclose = () => {
