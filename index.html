@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="container">
-        <iframe src="https://192.168.50.6:8889/cam"></iframe>
+        <iframe src="https://192.168.50.6:8889/mystream"></iframe>
 
         <div id="data-box">
             STATUS: <span id="status" style="color:white">CONNECTING...</span><br>
@@ -26,7 +26,7 @@
 
 <script>
     function connect() {
-        const ws = new WebSocket("ws://192.168.50.6:8000");
+        const ws = new WebSocket("ws://192.168.50.6:8001");
 
         ws.onopen = () => {
             document.getElementById('status').innerText = "LIVE";

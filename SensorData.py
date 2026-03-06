@@ -29,8 +29,8 @@ async def handle_websocket(websocket):
             print(f"Error: {e}")
             break
 
-start_server = websockets.serve(handle_websocket, "0.0.0.0", 8000)
+start_server = websockets.serve(handle_websocket, "0.0.0.0", 8001)
 
-print("WebSocket Server started on port 8000")
+print("WebSocket Server started on port 8001")
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
