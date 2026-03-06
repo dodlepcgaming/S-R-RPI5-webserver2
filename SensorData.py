@@ -4,51 +4,79 @@ import serial
 import json
 import time
 
-# Pi 5 GPIO Serial Port
-ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=0.1)
+# --- Configuration ---
+# Pi 5 UART setup. Ensure /dev/ttyAMA0 is enabled in raspi-config
+try:
+    ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=0.1)
+    print("Serial port /dev/ttyAMA0 opened successfully.")
+except Exception as e:
+    print(f"Error opening serial port: {e}")
+    exit()
 
 async def handle_websocket(websocket):
-    print("Web client connected")
+    print("Web client connected to Pi 5")
     last_heartbeat = 0
     
     while True:
         try:
-            # 1. Listen for User Input (WASD/Gamepad) from the browser
+            # 1. Listen for User Input (WASD/Gamepad) from UserInputs.js
             try:
-                # Use wait_for to prevent blocking the heartbeat/sensor loop
+                # wait_for prevents blocking the rest of the loop
                 message = await asyncio.wait_for(websocket.recv(), timeout=0.01)
                 data = json.loads(message)
+                
                 if "command" in data:
-                    ser.write(data["command"].encode()) # Sends '1', '2', etc.
+                    cmd = str(data["command"])
+                    ser.write(cmd.encode()) 
+                    # print(f"Sent Command to ESP32: {cmd}") # Debug
             except asyncio.TimeoutError:
                 pass
 
             # 2. Send Heartbeat 'C' every 2 seconds
+            # This resets the ESP32 failsafe timer
             if time.time() - last_heartbeat > 2:
                 ser.write(b'C')
                 last_heartbeat = time.time()
 
-            # 3. Request and Read Sensor Data
+            # 3. REQUEST and Read Sensor Data
+            # We send 'L' to trigger the ESP32's distance read logic
+            ser.write(b'L')
+            
+            # Wait a tiny bit for the ESP32 to respond with 2 bytes
+            await asyncio.sleep(0.01) 
+            
             if ser.in_waiting >= 2:
                 raw = ser.read(2)
-                # Reassemble as an unsigned 16-bit integer
+                # Reassemble 2 bytes into a 16-bit integer
                 distance = (raw[0] << 8) | raw[1]
                 
-                # Filter out garbage values (anything over 3 meters is likely an error)
+                # Filter out overflow/garbage values (over 3 meters)
                 if distance > 3000:
                     distance = 0
-                    
+                
+                # Send the data back to your web overlay
                 await websocket.send(json.dumps({"sensor": f"{distance} mm"}))
 
-            await asyncio.sleep(0.05) # 20Hz refresh rate
+            # Maintain a 20Hz loop for smooth responsiveness
+            await asyncio.sleep(0.05)
+
         except websockets.exceptions.ConnectionClosed:
+            print("Web client disconnected")
+            break
+        except Exception as e:
+            print(f"Loop Error: {e}")
             break
 
 async def main():
-    # This starts the server on all local network interfaces at port 8000
+    # Binds to all network interfaces on port 8001
     async with websockets.serve(handle_websocket, "0.0.0.0", 8001):
         print("WebSocket Server started on port 8001")
-        await asyncio.Future()  # This keeps the script running forever
+        # Keeps the server running indefinitely
+        await asyncio.Future() 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nStopping Server...")
+        ser.close()
