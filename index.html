@@ -25,13 +25,15 @@
     </div>
 
 <script>
-
     let ws;
+    // This object tracks the state of your arrow keys
+    const inputState = { MovementK: '0' };
 
     function connect() {
         ws = new WebSocket("ws://192.168.50.6:8001");
 
         ws.onopen = () => {
+            console.log("SUCCESS: Connected to Pi 5!");
             document.getElementById('status').innerText = "LIVE";
             document.getElementById('status').style.color = "#00ff00";
         };
@@ -39,22 +41,40 @@
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             document.getElementById('val').innerText = data.sensor;
-            
-            // Visual alert if too close
             let distInt = parseInt(data.sensor);
             document.getElementById('val').style.color = (distInt < 100) ? "red" : "#00ff00";
         };
 
         ws.onclose = () => {
+            console.log("WARNING: Disconnected from Pi. Retrying...");
             document.getElementById('status').innerText = "DISCONNECTED";
             document.getElementById('status').style.color = "red";
-            document.getElementById('val').innerText = "--";
-            // Try to reconnect every 2 seconds
             setTimeout(connect, 2000);
         };
     }
 
-    connect(); // Start connection
+    // Keyboard Input Logic
+    window.addEventListener("keydown", (e) => {
+        let command = '0';
+        if (e.key === "ArrowUp")    command = '1';
+        if (e.key === "ArrowDown")  command = '2';
+        if (e.key === "ArrowLeft")  command = '3';
+        if (e.key === "ArrowRight") command = '4';
+
+        if (command !== '0' && ws && ws.readyState === WebSocket.OPEN) {
+            console.log("Sending Command:", command); // THIS SHOULD SHOW IN CONSOLE
+            ws.send(JSON.stringify({ "command": command }));
+        }
+    });
+
+    window.addEventListener("keyup", (e) => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            console.log("Stopping Motors (Key Up)");
+            ws.send(JSON.stringify({ "command": '0' }));
+        }
+    });
+
+    connect(); 
 </script>
 <script src="UserInputs.js"></script>
 </body>
