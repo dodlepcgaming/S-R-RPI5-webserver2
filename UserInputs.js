@@ -18,38 +18,38 @@ window.addEventListener("keyup", (e) => {
 
 const gamepadInfo = document.getElementById("gamepad-info");
 const ball = document.getElementById("RVRBody");
-let start;
-let MovementC;
+let MovementC = '0';
 
 window.addEventListener("gamepadconnected", (e) => {
   const gp = navigator.getGamepads()[e.gamepad.index];
-  gamepadInfo.textContent = `Gamepad connected at index ${gp.index}: ${gp.id}. It has ${gp.buttons.length} buttons and ${gp.axes.length} axes.`;
-
-  RVRMovement();
+  if (gp) {
+    gamepadInfo.textContent = `Gamepad connected at index ${gp.index}: ${gp.id}. It has ${gp.buttons.length} buttons and ${gp.axes.length} axes.`;
+    requestAnimationFrame(RVRMovement);
+  }
 });
 
 window.addEventListener("gamepaddisconnected", (e) => {
   gamepadInfo.textContent = "Waiting for gamepad.";
-
 });
 
 function RVRMovement() {
   const gamepads = navigator.getGamepads();
-  if (!gamepads) {
+  if (!gamepads || !gamepads[0]) {
     return;
   }
 
   const gp = gamepads[0];
   if (gp.buttons[0].pressed) {
     MovementC = '1';
-  }
-  if (gp.buttons[1].pressed) {
+  } else if (gp.buttons[1].pressed) {
     MovementC = '2';
-  }
-  if (gp.buttons[2].pressed) {
+  } else if (gp.buttons[2].pressed) {
     MovementC = '3';
-  }
-  if (gp.buttons[3].pressed) {
+  } else if (gp.buttons[3].pressed) {
     MovementC = '4';
+  } else {
+    MovementC = '0';
   }
+
+  requestAnimationFrame(RVRMovement);
 }
