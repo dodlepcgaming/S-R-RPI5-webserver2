@@ -29,7 +29,7 @@ async def handle_websocket(websocket):
                     cmd = str(data["command"])
                     ser.write(cmd.encode()) 
                     # print(f"Sent Command to ESP32: {cmd}") # Debug
-                print(f"PI UART SEND -> ESP32: {cmd}") 
+                #print(f"PI UART SEND -> ESP32: {cmd}") 
             except asyncio.TimeoutError:
                 pass
 
