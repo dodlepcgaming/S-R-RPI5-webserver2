@@ -40,6 +40,7 @@ async def handle_websocket(websocket):
 
             # 3. REQUEST and Read Sensor Data
             # We send 'L' to trigger the ESP32's distance read logic
+            ser.reset_input_buffer() # Clear old bytes to ensure sync
             ser.write(b'L')
             
             # Wait a tiny bit for the ESP32 to respond with 2 bytes
@@ -51,11 +52,11 @@ async def handle_websocket(websocket):
                 distance = (raw[0] << 8) | raw[1]
                 
                 # Filter out overflow/garbage values (over 3 meters)
-                if distance > 3000:
-                    distance = 0
-                
-                # Send the data back to your web overlay
-                await websocket.send(json.dumps({"sensor": f"{distance} mm"}))
+                if distance > 8192 or distance == 0:
+                    # Keep last good distance or show out of range
+                    pass 
+                else:
+                    await websocket.send(json.dumps({"sensor": f"{distance} mm"}))
 
             # Maintain a 20Hz loop for smooth responsiveness
             await asyncio.sleep(0.05)
