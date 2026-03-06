@@ -26,7 +26,6 @@
 
 <script>
     let ws;
-    // This object tracks the state of your arrow keys
     const inputState = { MovementK: '0' };
 
     function connect() {
@@ -53,7 +52,6 @@
         };
     }
 
-    // Keyboard Input Logic
     window.addEventListener("keydown", (e) => {
         let command = '0';
         if (e.key === "ArrowUp")    command = '5';
@@ -66,7 +64,7 @@
         if (e.key === "d") command = '4';
 
         if (command !== '0' && ws && ws.readyState === WebSocket.OPEN) {
-            console.log("Sending Command:", command); // THIS SHOULD SHOW IN CONSOLE
+            console.log("Sending Command:", command);
             ws.send(JSON.stringify({ "command": command }));
         }
     });

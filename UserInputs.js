@@ -5,15 +5,13 @@ const inputState = {
 let MovementC = '0';
 const gamepadInfo = document.getElementById("gamepad-info");
 
-// --- 1. Keyboard Logic ---
 window.addEventListener("keydown", (e) => {
   let oldMove = inputState.MovementK;
   if (e.key === "ArrowUp")    inputState.MovementK = '1';
   if (e.key === "ArrowDown")  inputState.MovementK = '2';
   if (e.key === "ArrowLeft")  inputState.MovementK = '3';
   if (e.key === "ArrowRight") inputState.MovementK = '4';
-  
-  // This will print to the Opera GX console
+
   if (oldMove !== inputState.MovementK) {
       console.log("Keyboard Move Command:", inputState.MovementK);
       sendMovement();
@@ -25,7 +23,7 @@ function sendMovement() {
     
     if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ "command": activeMovement }));
-        console.log(">>> Sent to Pi:", activeMovement); // Confirming the send
+        console.log(">>> Sent to Pi:", activeMovement);
     } else {
         console.error("!!! WebSocket NOT CONNECTED. Check Pi script.");
     }
@@ -36,7 +34,6 @@ window.addEventListener("keyup", (e) => {
   sendMovement();
 });
 
-// --- 2. Gamepad Logic ---
 window.addEventListener("gamepadconnected", (e) => {
   const gp = navigator.getGamepads()[e.gamepad.index];
   gamepadInfo.textContent = `Connected: ${gp.id}`;
@@ -54,12 +51,11 @@ function updateGamepadLoop() {
   const gp = gamepads[0];
   let prevMovement = MovementC;
 
-  // Standard D-Pad mapping
-  if (gp.buttons[12].pressed)      MovementC = '1'; // Up
-  else if (gp.buttons[13].pressed) MovementC = '2'; // Down
-  else if (gp.buttons[14].pressed) MovementC = '3'; // Left
-  else if (gp.buttons[15].pressed) MovementC = '4'; // Right
-  // Standard Face Button mapping (A, B, X, Y)
+  if (gp.buttons[12].pressed)      MovementC = '1';
+  else if (gp.buttons[13].pressed) MovementC = '2';
+  else if (gp.buttons[14].pressed) MovementC = '3';
+  else if (gp.buttons[15].pressed) MovementC = '4';
+
   else if (gp.buttons[0].pressed)  MovementC = '1'; 
   else if (gp.buttons[1].pressed)  MovementC = '2';
   else if (gp.buttons[2].pressed)  MovementC = '3';
@@ -73,9 +69,7 @@ function updateGamepadLoop() {
   requestAnimationFrame(updateGamepadLoop);
 }
 
-// --- 3. Communication Bridge ---
 function sendMovement() {
-    // Priority: Gamepad takes precedence over Keyboard
     let activeMovement = (MovementC !== '0') ? MovementC : inputState.MovementK;
     
     if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
