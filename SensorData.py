@@ -39,3 +39,12 @@ async def handle_websocket(websocket):
             await asyncio.sleep(0.05) # 20Hz refresh rate
         except websockets.exceptions.ConnectionClosed:
             break
+
+async def main():
+    # This starts the server on all local network interfaces at port 8000
+    async with websockets.serve(handle_websocket, "0.0.0.0", 8001):
+        print("WebSocket Server started on port 8001")
+        await asyncio.Future()  # This keeps the script running forever
+
+if __name__ == "__main__":
+    asyncio.run(main())
