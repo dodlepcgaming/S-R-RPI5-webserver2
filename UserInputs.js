@@ -9,13 +9,27 @@ const gamepadInfo = document.getElementById("gamepad-info");
 window.addEventListener("keydown", (e) => {
   let oldMove = inputState.MovementK;
   if (e.key === "ArrowUp")    inputState.MovementK = '1';
-  else if (e.key === "ArrowDown")  inputState.MovementK = '2';
-  else if (e.key === "ArrowLeft")  inputState.MovementK = '3';
-  else if (e.key === "ArrowRight") inputState.MovementK = '4';
+  if (e.key === "ArrowDown")  inputState.MovementK = '2';
+  if (e.key === "ArrowLeft")  inputState.MovementK = '3';
+  if (e.key === "ArrowRight") inputState.MovementK = '4';
   
-  // Only send if the state actually changed (prevents key-repeat spam)
-  if (oldMove !== inputState.MovementK) sendMovement();
+  // This will print to the Opera GX console
+  if (oldMove !== inputState.MovementK) {
+      console.log("Keyboard Move Command:", inputState.MovementK);
+      sendMovement();
+  }
 });
+
+function sendMovement() {
+    let activeMovement = (MovementC !== '0') ? MovementC : inputState.MovementK;
+    
+    if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ "command": activeMovement }));
+        console.log(">>> Sent to Pi:", activeMovement); // Confirming the send
+    } else {
+        console.error("!!! WebSocket NOT CONNECTED. Check Pi script.");
+    }
+}
 
 window.addEventListener("keyup", (e) => {
   inputState.MovementK = '0';
