@@ -6,7 +6,7 @@ Y_servo = Servo(18, min_pulse_width=1/1000, max_pulse_width=2/1000)
 X_servo = Servo(19, min_pulse_width=1/1000, max_pulse_width=2/1000)
 
 async def handle_websocket(websocket):
-    print("Client connected to Pi 5 on port 8001")
+    print("Client connected to Pi 5 on port 8002")
     async for message in websocket:
         cmd = str(message).strip()
         
@@ -24,7 +24,7 @@ async def handle_websocket(websocket):
         print(f"Executing: {cmd}")
 
 async def main():
-    async with websockets.serve(handle_websocket, "0.0.0.0", 8001):
+    async with websockets.serve(handle_websocket, "0.0.0.0", 8002):
         await asyncio.Future()
 
 if __name__ == "__main__":

@@ -25,26 +25,28 @@
     </div>
 
 <script>
-    let ws;
+    let ws1;
+    let ws2;
     const inputState = { MovementK: '0' };
 
     function connect() {
-        ws = new WebSocket("ws://192.168.50.6:8001");
+        ws1 = new WebSocket("ws://192.168.50.6:8001");
+        ws2 = new WebSocket("ws://192.168.50.6:8002");
 
-        ws.onopen = () => {
+        ws1.onopen = () => {
             console.log("SUCCESS: Connected to Pi 5!");
             document.getElementById('status').innerText = "LIVE";
             document.getElementById('status').style.color = "#00ff00";
         };
 
-        ws.onmessage = (event) => {
+        ws1.onmessage = (event) => {
             const data = JSON.parse(event.data);
             document.getElementById('val').innerText = data.sensor;
             let distInt = parseInt(data.sensor);
             document.getElementById('val').style.color = (distInt < 100) ? "red" : "#00ff00";
         };
 
-        ws.onclose = () => {
+        ws1.onclose = () => {
             console.log("WARNING: Disconnected from Pi. Retrying...");
             document.getElementById('status').innerText = "DISCONNECTED";
             document.getElementById('status').style.color = "red";
@@ -63,16 +65,26 @@
         if (e.key === "s")  command = '3';
         if (e.key === "d") command = '4';
 
-        if (command !== '0' && ws && ws.readyState === WebSocket.OPEN) {
+        if (command !== '0' && ws1 && ws1.readyState === WebSocket.OPEN) {
             console.log("Sending Command:", command);
-            ws.send(JSON.stringify({ "command": command }));
+            ws1.send(JSON.stringify({ "command": command }));
+        }
+
+        if (command !== '0' && ws2 && ws2.readyState === WebSocket.OPEN) {
+            console.log("Sending Command:", command);
+            ws2.send(JSON.stringify({ "command": command }));
         }
     });
 
     window.addEventListener("keyup", (e) => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
+        if (ws1 && ws1.readyState === WebSocket.OPEN) {
             console.log("Stopping Motors (Key Up)");
-            ws.send(JSON.stringify({ "command": '0' }));
+            ws1.send(JSON.stringify({ "command": '0' }));
+        }
+
+        if (ws2 && ws2.readyState === WebSocket.OPEN) {
+            console.log("Stopping Motors (Key Up)");
+            ws2.send(JSON.stringify({ "command": '0' }));
         }
     });
 
