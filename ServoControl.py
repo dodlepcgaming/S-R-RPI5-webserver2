@@ -1,30 +1,34 @@
-import RPi.GPIO as GPIO
-import time
+import asyncio
+import websockets
+from gpiozero import Servo
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(2, GPIO.OUT)
+Y_servo = Servo(18, min_pulse_width=1/1000, max_pulse_width=2/1000)
+X_servo = Servo(19, min_pulse_width=1/1000, max_pulse_width=2/1000)
 
-pwm = GPIO.PWM(2, 50)
-pwm.start(0)
+async def handle_websocket(websocket):
+    print("Client connected to Pi 5 on port 8001")
+    async for message in websocket:
+        cmd = str(message).strip()
+        
+        if cmd == '5':     # UP
+            Y_servo.value = 1.0
+        elif cmd == '6':   # DOWN
+            Y_servo.value = -1.0
+        elif cmd == '7':   # LEFT
+            X_servo.value = 1.0
+        elif cmd == '8':   # RIGHT
+            X_servo.value = -1.0
+        else:              # STOP
+            Y_servo.value, X_servo.value = 0, 0
+            
+        print(f"Executing: {cmd}")
 
-    duty_cycle = (speed + 1) * 5 + 2.5
-    duty_cycle = max(2.5, min(12.5, duty_cycle))
+async def main():
+    async with websockets.serve(handle_websocket, "0.0.0.0", 8001):
+        await asyncio.Future()
 
-    print(f"Setting speed to {speed}, Duty Cycle: {duty_cycle}%")
-    pwm.ChangeDutyCycle(duty_cycle)
-
-try:
-    while True:
-        set_speed(1)
-        time.sleep(2)
-        set_speed(0)
-        time.sleep(2)
-        set_speed(-1)
-        time.sleep(2)
-        set_speed(0)
-        time.sleep(2)
-
-except KeyboardInterrupt:
-    print("Exiting...")
-    pwm.stop()
-    GPIO.cleanup()
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        Y_servo.value = right_servo.value = 0
