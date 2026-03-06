@@ -26,8 +26,11 @@ async def handle_websocket(websocket):
                 data = json.loads(message)
                 
                 if "command" in data:
-                    cmd = str(data["command"])
-                    ser.write(cmd.encode()) 
+                    raw_cmd = str(data["command"])
+                    filtered_cmd = "".join([c for c in raw_cmd if c in '01234'])
+
+                    if filtered_cmd:
+                        ser.write(filtered_cmd.encode()) 
                     # print(f"Sent Command to ESP32: {cmd}") # Debug
                 #print(f"PI UART SEND -> ESP32: {cmd}") 
             except asyncio.TimeoutError:

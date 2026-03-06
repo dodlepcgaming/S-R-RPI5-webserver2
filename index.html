@@ -56,10 +56,14 @@
     // Keyboard Input Logic
     window.addEventListener("keydown", (e) => {
         let command = '0';
-        if (e.key === "ArrowUp")    command = '1';
-        if (e.key === "ArrowDown")  command = '2';
-        if (e.key === "ArrowLeft")  command = '3';
-        if (e.key === "ArrowRight") command = '4';
+        if (e.key === "ArrowUp")    command = '5';
+        if (e.key === "ArrowDown")  command = '6';
+        if (e.key === "ArrowLeft")  command = '7';
+        if (e.key === "ArrowRight") command = '8';
+        if (e.key === "w")    command = '1';
+        if (e.key === "a")  command = '2';
+        if (e.key === "s")  command = '3';
+        if (e.key === "d") command = '4';
 
         if (command !== '0' && ws && ws.readyState === WebSocket.OPEN) {
             console.log("Sending Command:", command); // THIS SHOULD SHOW IN CONSOLE
