@@ -11,7 +11,11 @@ X_servo = Servo(19, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_w
 async def handle_websocket(websocket):
     print("Client connected to Pi 5 on port 8002")
     async for message in websocket:
-        cmd = str(data.get("command", "")).strip()
+        try:
+            data = json.loads(message)
+            cmd = str(data.get("command", "")).strip()
+        except json.JSONDecodeError:
+            cmd = str(message).strip()
         
         if cmd == '5':     # UP
             Y_servo.value = 1.0
