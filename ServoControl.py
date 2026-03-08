@@ -1,14 +1,17 @@
 import asyncio
 import websockets
 from gpiozero import Servo
+from gpiozero.pins.lgpio import LGPIOFactory
+import json
 
-Y_servo = Servo(13, min_pulse_width=1/1000, max_pulse_width=2/1000)
-X_servo = Servo(19, min_pulse_width=1/1000, max_pulse_width=2/1000)
+pin_factory = LGPIOFactory()
+Y_servo = Servo(13, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_width=2/1000)
+X_servo = Servo(19, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_width=2/1000)
 
 async def handle_websocket(websocket):
     print("Client connected to Pi 5 on port 8002")
     async for message in websocket:
-        cmd = str(message).strip()
+        cmd = str(data.get("command", "")).strip()
         
         if cmd == '5':     # UP
             Y_servo.value = 1.0
@@ -31,4 +34,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        Y_servo.value = right_servo.value = 0
+        Y_servo.value = X_servo.value = None
