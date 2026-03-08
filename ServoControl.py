@@ -19,7 +19,7 @@ async def handle_websocket(websocket):
         elif cmd == '8':   # RIGHT
             X_servo.value = -1.0
         else:              # STOP
-            Y_servo.value, X_servo.value = 0, 0
+            Y_servo.value, X_servo.value = None, None
             
         print(f"Executing: {cmd}")
 
