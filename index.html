@@ -33,6 +33,9 @@
         ws1 = new WebSocket("ws://192.168.50.6:8001");
         ws2 = new WebSocket("ws://192.168.50.6:8002");
 
+        ws1.onopen = () => console.log("SUCCESS: Motor Server (8001) Connected");
+        ws2.onopen = () => console.log("SUCCESS: Servo Server (8002) Connected");
+
         ws1.onopen = () => {
             console.log("SUCCESS: Connected to Pi 5!");
             document.getElementById('status').innerText = "LIVE";
