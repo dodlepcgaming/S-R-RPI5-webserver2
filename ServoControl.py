@@ -2,7 +2,7 @@ import asyncio
 import websockets
 from gpiozero import Servo
 
-Y_servo = Servo(18, min_pulse_width=1/1000, max_pulse_width=2/1000)
+Y_servo = Servo(13, min_pulse_width=1/1000, max_pulse_width=2/1000)
 X_servo = Servo(19, min_pulse_width=1/1000, max_pulse_width=2/1000)
 
 async def handle_websocket(websocket):
