@@ -6,7 +6,7 @@ import json
 
 pin_factory = LGPIOFactory()
 Y_servo = Servo(13, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_width=2/1000)
-X_servo = Servo(19, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_width=2/1000)
+X_servo = Servo(12, pin_factory=pin_factory, min_pulse_width=1/1000, max_pulse_width=2/1000)
 
 async def handle_websocket(websocket):
     print("Client connected to Pi 5 on port 8002")
