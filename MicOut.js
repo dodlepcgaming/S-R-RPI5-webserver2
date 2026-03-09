@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const Speaker = require('speaker');
 
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 8003 });
 const speaker = new Speaker({
   channels: 1,
   bitDepth: 16,
