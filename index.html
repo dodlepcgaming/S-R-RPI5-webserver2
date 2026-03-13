@@ -30,8 +30,8 @@
     const inputState = { MovementK: '0' };
 
     function connect() {
-        ws1 = new WebSocket("ws://192.168.50.6:8001");
-        ws2 = new WebSocket("ws://192.168.50.6:8002");
+        ws1 = new WebSocket("wss://markraspi5.local:8001");
+        ws2 = new WebSocket("wss://markraspi5.local:8002");
 
         ws1.onopen = () => console.log("SUCCESS: Motor Server (8001) Connected");
         ws2.onopen = () => console.log("SUCCESS: Servo Server (8002) Connected");

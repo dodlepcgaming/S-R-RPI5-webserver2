@@ -1,5 +1,5 @@
 async function startAudio() {
-    const audioWs = new WebSocket("ws://192.168.50.6:8003");
+    const audioWs = new WebSocket("wss://markraspi5.local:8003");
     audioWs.binaryType = 'arraybuffer';
 
     const audioContext = new AudioContext({ sampleRate: 44100 });
