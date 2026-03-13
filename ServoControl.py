@@ -24,7 +24,7 @@ async def handle_websocket(websocket):
         elif cmd == '8':   # RIGHT
             X_servo.value = -1.0
         else:              # STOP
-            Y_servo.value, X_servo.value = None, None
+            Y_servo.value, X_servo.value = 0.0, 0.0
             
         print(f"Executing: {cmd}")
 
@@ -36,4 +36,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        Y_servo.value = X_servo.value = None
+        Y_servo.value = X_servo.value = 0.0
